@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 // --- 类型定义 ---
 // 为组件的属性（props）添加明确的 TypeScript 类型，解决 "implicitly has an 'any' type" 错误。
@@ -9,15 +9,8 @@ interface HeaderProps {
   onImportClick: () => void;
 }
 
-interface ToolbarProps {
-  // 这里可以添加未来可能需要的属性
-}
-
-interface EditorProps {
-  text: string;
-  onTextChange: (event: React.ChangeEvent<HTMLDivElement>) => void;
-  editorRef: React.RefObject<HTMLDivElement>;
-}
+// 使用 Record<string, never> 来明确表示一个不接受任何属性的对象，以修复 no-empty-object-type lint 错误。
+type ToolbarProps = Record<string, never>;
 
 interface FooterProps {
   charCount: number;
@@ -123,22 +116,6 @@ const Toolbar: React.FC<ToolbarProps> = () => {
     );
 };
 
-// --- 编辑器区域 ---
-const Editor: React.FC<EditorProps> = ({ text, onTextChange, editorRef }) => {
-    return (
-        <div className="flex-grow bg-gray-100 p-8 flex justify-center overflow-y-auto">
-            <div
-                ref={editorRef}
-                contentEditable
-                onInput={onTextChange}
-                className="w-[210mm] min-h-[297mm] bg-white shadow-lg p-16 text-black outline-none"
-                style={{ fontFamily: '宋体', fontSize: '14pt' }} // Simulating '五号' font size
-            >
-            </div>
-        </div>
-    );
-};
-
 // --- 底部状态栏 ---
 const Footer: React.FC<FooterProps> = ({ charCount }) => {
     return (
@@ -185,7 +162,7 @@ export default function WpsReaderPage() {
         }
     };
     
-    const handleTextChange = () => {
+    const handleTextChange = useCallback(() => {
       if (!editorRef.current || !originalContent) return;
       
       const currentLength = editorRef.current.innerText.length;
@@ -206,13 +183,13 @@ export default function WpsReaderPage() {
           sel?.removeAllRanges();
           sel?.addRange(range);
       }
-    };
+    }, [originalContent]);
 
     useEffect(() => {
         if (editorRef.current) {
             handleTextChange();
         }
-    }, [displayedContent]);
+    }, [displayedContent, handleTextChange]);
 
 
     return (
@@ -239,3 +216,4 @@ export default function WpsReaderPage() {
         </div>
     );
 }
+
