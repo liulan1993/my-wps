@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useState, useRef, FC, SetStateAction, Dispatch } from 'react';
+import React, { useState, useRef, FC } from 'react';
 
 // --- 类型定义 ---
 interface HeaderProps {
   onImportClick: () => void;
 }
 
-interface ToolbarProps {
-  // 目前不需要任何 props
-}
+// 使用 Record<string, never> 来定义一个不接受任何属性的类型
+type ToolbarProps = Record<string, never>;
 
 // --- SVG 图标组件 ---
 // 为了保持代码整洁和独立，所有图标都作为独立的组件创建
