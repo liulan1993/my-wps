@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useRef, FC } from 'react';
+import React, { useState, useRef, FC, useCallback } from 'react';
 
 // --- 类型定义 ---
 interface HeaderProps {
   onImportClick: () => void;
 }
 
-// 使用 Record<string, never> 来定义一个不接受任何属性的类型
 type ToolbarProps = Record<string, never>;
 
+
 // --- SVG 图标组件 ---
-// 为了保持代码整洁和独立，所有图标都作为独立的组件创建
 const IconSave: FC = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
 const IconUndo: FC = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>;
 const IconRedo: FC = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 0 9 9 9 9 0 0 0 6-2.3L21 13"></path></svg>;
@@ -33,18 +32,14 @@ const Header: FC<HeaderProps> = ({ onImportClick }) => {
 
   return (
     <div className="bg-white text-gray-800 shadow-sm">
-      {/* 窗口标题栏 */}
       <div className="flex justify-between items-center h-8 px-2 bg-gray-100 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <span className="text-blue-600 font-bold text-sm">WPS 文字</span>
           <span className="text-xs text-gray-600">新建 DOCX文档.docx</span>
         </div>
-        <div className="flex items-center">
-            {/* 窗口控制按钮 (装饰) */}
-        </div>
+        <div></div>
       </div>
       
-      {/* 文件菜单和快速访问 */}
       <div className="flex justify-between items-center h-10 px-4">
         <div className="flex items-center">
             <button className="text-sm px-3 py-1 bg-blue-500 text-white rounded-sm">文件</button>
@@ -60,7 +55,6 @@ const Header: FC<HeaderProps> = ({ onImportClick }) => {
         </div>
       </div>
 
-      {/* 功能区选项卡 */}
       <div className="flex items-center px-4 border-b border-gray-200">
         {tabs.map(tab => (
           <button 
@@ -71,7 +65,6 @@ const Header: FC<HeaderProps> = ({ onImportClick }) => {
             {tab}
           </button>
         ))}
-        {/* 新增的导入按钮 */}
         <button
           onClick={onImportClick}
           className="flex items-center gap-2 px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded-md ml-4"
@@ -89,7 +82,6 @@ const Header: FC<HeaderProps> = ({ onImportClick }) => {
 const Toolbar: FC<ToolbarProps> = () => {
     return (
         <div className="bg-white px-4 py-2 flex items-center space-x-4 border-b border-gray-200 text-xs text-gray-700">
-            {/* 字体格式 */}
             <div className="flex items-center space-x-1">
                 <button className="p-1 hover:bg-gray-100 rounded-sm">格式刷</button>
                 <div className="h-6 border-l border-gray-300 mx-2"></div>
@@ -106,14 +98,12 @@ const Toolbar: FC<ToolbarProps> = () => {
                 <button className="p-1 hover:bg-gray-100 rounded-sm"><IconUnderline /></button>
             </div>
             <div className="h-6 border-l border-gray-300"></div>
-            {/* 对齐方式 */}
             <div className="flex items-center space-x-1">
                 <button className="p-1 hover:bg-gray-100 rounded-sm"><IconAlignLeft /></button>
                 <button className="p-1 hover:bg-gray-100 rounded-sm"><IconAlignCenter /></button>
                 <button className="p-1 hover:bg-gray-100 rounded-sm"><IconAlignRight /></button>
             </div>
             <div className="h-6 border-l border-gray-300"></div>
-            {/* 样式 */}
             <div className="flex items-center space-x-2">
                 <button className="px-3 py-1 border border-blue-300 bg-blue-50 rounded-sm text-blue-600">正文</button>
                 <button className="px-3 py-1 border border-gray-300 rounded-sm">标题 1</button>
@@ -130,25 +120,25 @@ export default function Home() {
   const [userTypedValue, setUserTypedValue] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImportClick = () => {
+  const handleImportClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === "text/plain") {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setImportedContent(result);
-        setUserTypedValue(''); // 重置输入
+        setUserTypedValue('');
       };
       reader.readAsText(file);
     } else {
         alert("请选择一个 .txt 格式的文件。");
     }
-    event.target.value = ''; // 允许再次选择相同的文件
-  };
+    event.target.value = '';
+  }, []);
 
   const handleUserInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setUserTypedValue(e.target.value);
@@ -165,7 +155,6 @@ export default function Home() {
       <Header onImportClick={handleImportClick} />
       <Toolbar />
       
-      {/* 隐藏的文件输入框 */}
       <input
         type="file"
         ref={fileInputRef}
@@ -174,7 +163,6 @@ export default function Home() {
         accept=".txt"
       />
       
-      {/* --- 可编辑的文档区域 --- */}
       <main className="flex-grow overflow-auto py-8 flex justify-center">
         <div 
           className="w-[210mm] min-h-[297mm] h-fit bg-white shadow-lg p-16"
@@ -188,7 +176,6 @@ export default function Home() {
         </div>
       </main>
 
-      {/* --- 底部状态栏 --- */}
       <footer className="bg-gray-100 h-6 border-t border-gray-200 px-4 flex items-center justify-between text-xs text-gray-600">
         <div>
             <span>页面: 1/1</span>
