@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useRef } from 'react';
 
 // --- SVG 图标组件 ---
